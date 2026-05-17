@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  zenetrix-db:
+    image: postgres:15-alpine
+    container_name: zenetrix-db
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: zenetrix
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  zenetrix-backend:
+    build: .
+    container_name: zenetrix-backend
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_URL=jdbc:postgresql://zenetrix-db:5432/zenetrix
+      - DB_USERNAME=${DB_USERNAME:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - SERVER_PORT=8081
+      - JWT_SECRET=${JWT_SECRET:-8f7e6d5c4b3a2918273645546372819203948576a5b4c3d2e1f0}
+      - WEBHOOK_API_KEY=${WEBHOOK_API_KEY:-default-secret-key-for-webhooks}
+      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+    depends_on:
+      - zenetrix-db
+    restart: unless-stopped
+
+volumes:
+  pgdata:

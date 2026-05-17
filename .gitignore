@@ -1,0 +1,8 @@
+**/target/
+**/node_modules/
+**/dist/
+**/.env
+**/application-local.properties
+*.log
+.idea/
+.vscode/
