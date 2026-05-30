@@ -33,6 +33,7 @@ public class IncidentService {
     private final com.jaswin.incidentmanagement.repository.ServiceComponentRepository serviceRepository;
     private final com.jaswin.incidentmanagement.repository.UserRepository userRepository;
     private final com.jaswin.incidentmanagement.repository.SlaPolicyRepository slaPolicyRepository;
+    private final BlastRadiusService blastRadiusService;
 
     // CREATE incident
     public Incident createIncident(IncidentRequest request) {
@@ -82,6 +83,12 @@ public class IncidentService {
         }
         
         incident = incidentRepository.save(incident);
+        
+        if (incident.getService() != null && incident.getOrganization() != null) {
+            com.jaswin.incidentmanagement.dto.BlastRadiusReport report = blastRadiusService.calculate(incident.getService().getId(), incident.getOrganization().getId());
+            incident.setPredictedImpact(report.getSeverity());
+            incident = incidentRepository.save(incident);
+        }
         
         logHistory(incident, null, Status.OPEN, currentUser.getName(), "Incident Created");
         

@@ -100,7 +100,7 @@ public class IncidentController {
     @Operation(summary = "Get blast radius report for an incident")
     @org.springframework.security.access.prepost.PreAuthorize("@incidentAuthorizationService.canAccessIncident(authentication, #id)")
     public ResponseEntity<?> getBlastRadius(@PathVariable Long id, @org.springframework.beans.factory.annotation.Autowired com.jaswin.incidentmanagement.service.BlastRadiusService blastRadiusService) {
-        return ResponseEntity.ok(blastRadiusService.calculate(id));
+        return ResponseEntity.ok(blastRadiusService.calculateForIncident(id));
     }
 
     @GetMapping("/{id}/suggestions")

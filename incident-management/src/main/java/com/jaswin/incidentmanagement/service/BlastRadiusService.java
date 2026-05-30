@@ -16,22 +16,29 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BlastRadiusService {
 
-    private final IncidentService incidentService;
     private final ServiceDependencyRepository dependencyRepository;
     private final WorkTaskRepository taskRepository;
     private final IncidentRepository incidentRepository;
     private final TeamMemberRepository teamMemberRepository;
+    private final ServiceComponentRepository serviceRepository;
 
-    public BlastRadiusReport calculate(Long incidentId) {
-        Incident incident = incidentService.getIncidentById(incidentId);
-        if (incident.getService() == null || incident.getOrganization() == null) {
+    public BlastRadiusReport calculateForIncident(Long incidentId) {
+        Incident incident = incidentRepository.findById(incidentId).orElse(null);
+        if (incident == null || incident.getService() == null || incident.getOrganization() == null) {
+            return emptyReport();
+        }
+        return calculate(incident.getService().getId(), incident.getOrganization().getId());
+    }
+
+    public BlastRadiusReport calculate(Long serviceId, Long orgId) {
+        ServiceComponent service = serviceRepository.findByIdAndOrganizationId(serviceId, orgId).orElse(null);
+        if (service == null) {
             return emptyReport();
         }
 
-        Long orgId = incident.getOrganization().getId();
         Map<Long, BlastRadiusReport.AffectedService> affected = new LinkedHashMap<>();
         Deque<ServiceHop> queue = new ArrayDeque<>();
-        queue.add(new ServiceHop(incident.getService(), "source", 0));
+        queue.add(new ServiceHop(service, "source", 0));
 
         while (!queue.isEmpty()) {
             ServiceHop hop = queue.removeFirst();
