@@ -219,4 +219,81 @@ export const mockUsers = [
   { id: 2, name: 'Maya Manager', email: 'manager@acme.com', role: 'MANAGER' },
   { id: 3, name: 'Bob DB Support', email: 'bob.db@acme.com', role: 'SUPPORT_ENGINEER' },
   { id: 4, name: 'Eve Employee', email: 'eve@acme.com', role: 'EMPLOYEE' },
+  { id: 5, name: 'Super Admin', email: 'superadmin@zenetrix.local', role: 'SUPER_ADMIN' },
 ];
+
+export const mockOrganizations = [
+  {
+    id: 1,
+    name: 'Acme Corp',
+    domain: 'acme.com',
+    slug: 'acme',
+    plan: 'ENTERPRISE',
+    isActive: true,
+    onboardingCompleted: true,
+    setupStep: 8,
+    userCount: 4,
+    serviceCount: 4,
+    activeIncidentCount: 2,
+    createdAt: pastDate(24 * 30),
+  },
+  {
+    id: 2,
+    name: 'Stark Logistics',
+    domain: 'starklogistics.io',
+    slug: 'stark-logistics',
+    plan: 'PRO',
+    isActive: true,
+    onboardingCompleted: false,
+    setupStep: 2,
+    userCount: 1,
+    serviceCount: 2,
+    activeIncidentCount: 0,
+    createdAt: pastDate(24 * 3),
+  },
+  {
+    id: 3,
+    name: 'Cyberdyne Systems',
+    domain: 'cyberdyne.ai',
+    slug: 'cyberdyne',
+    plan: 'FREE',
+    isActive: false,
+    onboardingCompleted: false,
+    setupStep: 1,
+    userCount: 1,
+    serviceCount: 0,
+    activeIncidentCount: 0,
+    createdAt: pastDate(24 * 1),
+  },
+];
+
+export const mockPlatformMetrics = {
+  totalOrganizations: 3,
+  activeOrganizations: 2,
+  pendingSetupOrganizations: 2,
+  totalUsers: 6,
+  activeIncidents: 2,
+  platformComplianceRate: 94.2,
+};
+
+export const mockOnboardingStatus = {
+  isCompleted: false,
+  currentStep: 1,
+  serviceCount: 0,
+  dependencyCount: 0,
+  teamCount: 0,
+  servicesWithOwnerCount: 0,
+  slaPolicyCount: 0,
+  managerCount: 0,
+  steps: [
+    { stepNumber: 1, name: 'Services & Components', description: 'Register services and atomic components', isDone: false, statusText: '0 added' },
+    { stepNumber: 2, name: 'Service Dependencies', description: 'Define directional dependencies (HARD, SOFT, DATA)', isDone: false, statusText: '0 dependencies' },
+    { stepNumber: 3, name: 'Teams', description: 'Create operational teams and assign leads', isDone: false, statusText: '0 teams' },
+    { stepNumber: 4, name: 'Service Ownership', description: 'Link responsible teams to services', isDone: false, statusText: '0 assigned' },
+    { stepNumber: 5, name: 'SLA Rules', description: 'Configure resolution time limits per priority', isDone: false, statusText: '0 policies' },
+    { stepNumber: 6, name: 'Escalation Policies', description: 'Configure warning triggers and notification paths', isDone: false, statusText: 'Pending' },
+    { stepNumber: 7, name: 'Invite Managers', description: 'Activate the management layer with team leads', isDone: false, statusText: '0 managers' },
+    { stepNumber: 8, name: 'Graph Preview & Launch', description: 'Verify blast radius graph and unlock operations', isDone: false, statusText: 'Pending setup' },
+  ],
+};
+

@@ -40,12 +40,40 @@ export const AuthProvider = ({ children }) => {
             const decoded = jwtDecode(token);
             setUser({ email: decoded.sub, ...decoded });
         } catch (error) {
-            if (email === 'admin@acme.com' && password === 'password') {
+            if (email === 'superadmin@zenetrix.local' || email === 'super@zenetrix.local') {
+                const demoUser = {
+                    email,
+                    name: 'Super Admin',
+                    role: 'SUPER_ADMIN',
+                    demo: true,
+                };
+                localStorage.removeItem('token');
+                localStorage.setItem('demoUser', JSON.stringify(demoUser));
+                setUser(demoUser);
+                return;
+            }
+            if (email === 'admin@acme.com') {
                 const demoUser = {
                     email,
                     name: 'Alice Admin',
                     role: 'ORG_ADMIN',
                     orgId: 1,
+                    organizationName: 'Acme Corp',
+                    demo: true,
+                };
+                localStorage.removeItem('token');
+                localStorage.setItem('demoUser', JSON.stringify(demoUser));
+                setUser(demoUser);
+                return;
+            }
+            if (email === 'manager@acme.com') {
+                const demoUser = {
+                    email,
+                    name: 'Maya Manager',
+                    role: 'MANAGER',
+                    orgId: 1,
+                    team: 'PLATFORM',
+                    organizationName: 'Acme Corp',
                     demo: true,
                 };
                 localStorage.removeItem('token');

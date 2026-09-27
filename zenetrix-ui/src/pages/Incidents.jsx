@@ -10,9 +10,11 @@ import {
   Send,
   ShieldAlert,
   UserRound,
+  UserCheck,
   X,
 } from 'lucide-react';
 import api from '../api';
+import { useAuth } from '../AuthContext';
 import {
   mockBlastRadius,
   mockIncidents,
@@ -53,6 +55,7 @@ const minutesToLabel = (dateValue) => {
 };
 
 const Incidents = () => {
+  const { user } = useAuth();
   const [incidents, setIncidents] = useState(mockIncidents);
   const [services, setServices] = useState(mockServices);
   const [tasks, setTasks] = useState(mockTasks);
@@ -164,6 +167,34 @@ const Incidents = () => {
     }
   };
 
+  const updateIncidentStatus = async (newStatus) => {
+    if (!selectedIncident) return;
+    try {
+      const response = await api.put(`/incidents/${selectedIncident.id}/status`, { status: newStatus });
+      setIncidents((current) => current.map((inc) => (inc.id === selectedIncident.id ? response.data : inc)));
+    } catch {
+      setIncidents((current) =>
+        current.map((inc) => (inc.id === selectedIncident.id ? { ...inc, status: newStatus } : inc))
+      );
+    }
+  };
+
+  const assignToMe = () => {
+    if (!selectedIncident) return;
+    const currentUserName = user?.name || user?.email || 'Current user';
+    setIncidents((current) =>
+      current.map((inc) =>
+        inc.id === selectedIncident.id
+          ? { ...inc, assignedTo: { name: currentUserName } }
+          : inc
+      )
+    );
+  };
+
+  const dismissSuggestion = (incidentId) => {
+    setSuggestions((current) => current.filter((s) => s.incidentId !== incidentId));
+  };
+
   return (
     <div className="grid grid-cols-[360px_1fr] gap-6">
       <aside className="panel h-[calc(100vh-136px)] overflow-hidden">
@@ -214,8 +245,22 @@ const Incidents = () => {
             <div className="panel p-6">
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
-                  <div className="mb-3 flex items-center gap-2">
-                    <span className={`badge ${statusTone[selectedIncident.status] || statusTone.CLOSED}`}>{selectedIncident.status}</span>
+                  <div className="mb-3 flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <label className="text-xs font-semibold text-ink-muted">Status:</label>
+                      <select
+                        value={selectedIncident.status}
+                        onChange={(e) => updateIncidentStatus(e.target.value)}
+                        className={`rounded border px-2 py-0.5 text-xs font-semibold uppercase tracking-wider cursor-pointer ${
+                          statusTone[selectedIncident.status] || statusTone.CLOSED
+                        }`}
+                      >
+                        <option value="OPEN">OPEN</option>
+                        <option value="IN_PROGRESS">IN PROGRESS</option>
+                        <option value="RESOLVED">RESOLVED</option>
+                        <option value="CLOSED">CLOSED</option>
+                      </select>
+                    </div>
                     <span className={`badge ${priorityTone[selectedIncident.priority] || priorityTone.LOW}`}>{selectedIncident.priority}</span>
                   </div>
                   <h3 className="text-2xl font-semibold">{selectedIncident.title}</h3>
@@ -229,7 +274,24 @@ const Incidents = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <InfoTile icon={GitBranch} label="Service" value={selectedIncident.service?.name || 'Unmapped'} />
-                <InfoTile icon={UserRound} label="Assigned To" value={selectedIncident.assignedTo?.name || 'Unassigned'} />
+                <div className="rounded-md border border-line bg-muted p-4">
+                  <div className="flex items-center justify-between text-xs font-semibold uppercase text-ink-muted">
+                    <div className="flex items-center gap-2">
+                      <UserRound size={14} />
+                      Assigned To
+                    </div>
+                    {(!selectedIncident.assignedTo || selectedIncident.assignedTo?.name === 'Unassigned') && (
+                      <button
+                        type="button"
+                        onClick={assignToMe}
+                        className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1"
+                      >
+                        <UserCheck size={12} /> Claim
+                      </button>
+                    )}
+                  </div>
+                  <div className="mt-2 text-sm font-semibold">{selectedIncident.assignedTo?.name || 'Unassigned'}</div>
+                </div>
                 <InfoTile icon={Clock3} label="Created" value={new Date(selectedIncident.createdAt).toLocaleString()} />
                 <InfoTile icon={ShieldAlert} label="Project" value={selectedIncident.project?.name || 'Independent incident'} />
               </div>
@@ -311,7 +373,13 @@ const Incidents = () => {
                       <Check size={15} />
                       Solved it
                     </button>
-                    <button type="button" className="icon-button" aria-label="Dismiss suggestion">
+                    <button
+                      type="button"
+                      className="icon-button text-ink-muted hover:text-danger hover:bg-danger/10"
+                      onClick={() => dismissSuggestion(suggestion.incidentId)}
+                      aria-label="Dismiss suggestion"
+                      title="Dismiss suggestion"
+                    >
                       <X size={15} />
                     </button>
                   </div>

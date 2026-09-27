@@ -14,6 +14,8 @@ public class ServiceComponentRequest {
     @NotNull
     private ServiceType type;
 
+    private String customType;
+
     private String description;
 
     private Long ownerTeamId;

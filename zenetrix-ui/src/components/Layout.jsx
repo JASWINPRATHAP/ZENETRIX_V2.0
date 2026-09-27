@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import {
@@ -9,23 +10,49 @@ import {
   LogOut,
   ShieldCheck,
   TicketCheck,
+  Wand2,
 } from 'lucide-react';
+import OnboardingWizard from './OnboardingWizard';
+import api from '../api';
 
-const navItems = [
+const defaultNavItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/operations', label: 'Operations Graph', icon: GitBranch },
   { to: '/incidents', label: 'Incidents', icon: TicketCheck },
+];
+
+const superAdminNavItems = [
+  { to: '/platform', label: 'Platform Portal', icon: Building2 },
 ];
 
 const pageTitles = {
   '/': 'Operational Awareness',
   '/operations': 'Organization Setup',
   '/incidents': 'Incident Command',
+  '/platform': 'Platform Administration',
 };
+
 
 const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [wizardOpen, setWizardOpen] = useState(false);
+
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+  const isOrgAdmin = user?.role === 'ORG_ADMIN';
+  const navItems = isSuperAdmin ? superAdminNavItems : defaultNavItems;
+
+  useEffect(() => {
+    if (isOrgAdmin) {
+      api.get('/org/onboarding/status')
+        .then((res) => {
+          if (res.data && !res.data.isCompleted) {
+            setWizardOpen(true);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isOrgAdmin]);
 
   return (
     <div className="min-h-screen bg-background text-ink">
@@ -62,15 +89,28 @@ const Layout = ({ children }) => {
               </NavLink>
             );
           })}
+
+          {isOrgAdmin && (
+            <button
+              type="button"
+              onClick={() => setWizardOpen(true)}
+              className="mt-4 flex h-11 w-full items-center gap-3 rounded-md border border-dashed border-primary/40 bg-primary/5 px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+            >
+              <Wand2 size={18} />
+              Setup Wizard (8 Steps)
+            </button>
+          )}
         </nav>
 
         <div className="border-t border-line p-4">
           <div className="mb-3 rounded-md border border-line bg-muted p-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase text-ink-muted">
               <Building2 size={14} />
-              Tenant
+              {isSuperAdmin ? 'Platform Fleet' : 'Tenant Scope'}
             </div>
-            <div className="mt-2 text-sm font-semibold">Acme Corp</div>
+            <div className="mt-2 text-sm font-semibold">
+              {isSuperAdmin ? 'Global Administration' : user?.organizationName || 'Acme Corp'}
+            </div>
           </div>
           <button
             type="button"
@@ -87,6 +127,7 @@ const Layout = ({ children }) => {
       </aside>
 
       <main className="min-h-screen pl-[272px]">
+
         <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b border-line bg-background/95 px-8 backdrop-blur">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase text-ink-muted">
@@ -106,8 +147,15 @@ const Layout = ({ children }) => {
         </header>
         <div className="px-8 py-7">{children}</div>
       </main>
+
+      <OnboardingWizard
+        isOpen={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        onComplete={() => setWizardOpen(false)}
+      />
     </div>
   );
 };
+
 
 export default Layout;

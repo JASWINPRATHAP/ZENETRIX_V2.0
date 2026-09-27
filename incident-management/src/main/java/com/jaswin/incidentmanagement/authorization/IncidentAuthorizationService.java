@@ -21,7 +21,7 @@ public class IncidentAuthorizationService {
         if (incident == null) return false;
 
         if (user.getRole() == Role.SUPER_ADMIN) {
-            return incident.getOrganization() == null;
+            return true;
         }
 
         // Must be in the same organization
@@ -35,7 +35,7 @@ public class IncidentAuthorizationService {
         }
 
         if (user.getRole() == Role.SUPPORT_ENGINEER) {
-            return incident.getAssignedTo() == null || incident.getAssignedTo().getId().equals(user.getId());
+            return true;
         }
 
         if (user.getRole() == Role.EMPLOYEE) {
@@ -53,13 +53,13 @@ public class IncidentAuthorizationService {
 
         if (incident == null) return false;
 
-        if (user.getRole() == Role.ORG_ADMIN || user.getRole() == Role.MANAGER) {
+        if (user.getRole() == Role.SUPER_ADMIN || user.getRole() == Role.ORG_ADMIN || user.getRole() == Role.MANAGER) {
             return true;
         }
 
-        // Support engineers can modify if assigned to them
+        // Support engineers (Dev/Tester) can modify if assigned to them or if unassigned (claiming)
         if (user.getRole() == Role.SUPPORT_ENGINEER) {
-            return incident.getAssignedTo() != null && incident.getAssignedTo().getId().equals(user.getId());
+            return incident.getAssignedTo() == null || incident.getAssignedTo().getId().equals(user.getId());
         }
 
         // Employees cannot modify (e.g. status updates) once created

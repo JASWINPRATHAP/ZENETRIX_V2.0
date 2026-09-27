@@ -32,14 +32,17 @@ public class ServiceRegistryService {
 
     @Transactional
     public ServiceComponent createService(ServiceComponentRequest request) {
-        tenantContext.requireAny(Role.ORG_ADMIN);
+        tenantContext.requireAny(Role.ORG_ADMIN, Role.MANAGER);
         Organization org = tenantContext.currentOrganization();
-        Team ownerTeam = request.getOwnerTeamId() == null ? null : findTeam(request.getOwnerTeamId(), org.getId());
+        Team ownerTeam = request.getOwnerTeamId() == null
+                ? null
+                : teamRepository.findByIdAndOrganizationId(request.getOwnerTeamId(), org.getId()).orElse(null);
 
         ServiceComponent service = ServiceComponent.builder()
                 .organization(org)
                 .name(request.getName())
                 .type(request.getType())
+                .customType(request.getCustomType())
                 .description(request.getDescription())
                 .ownerTeam(ownerTeam)
                 .status(request.getStatus() == null ? ServiceStatus.OPERATIONAL : request.getStatus())
@@ -50,22 +53,25 @@ public class ServiceRegistryService {
 
     @Transactional
     public ServiceComponent updateService(Long id, ServiceComponentRequest request) {
-        tenantContext.requireAny(Role.ORG_ADMIN);
+        tenantContext.requireAny(Role.ORG_ADMIN, Role.MANAGER);
         Long orgId = tenantContext.currentOrganizationId();
         ServiceComponent service = findService(id, orgId);
 
         service.setName(request.getName());
         service.setType(request.getType());
+        service.setCustomType(request.getCustomType());
         service.setDescription(request.getDescription());
         service.setStatus(request.getStatus() == null ? service.getStatus() : request.getStatus());
-        service.setOwnerTeam(request.getOwnerTeamId() == null ? null : findTeam(request.getOwnerTeamId(), orgId));
+        service.setOwnerTeam(request.getOwnerTeamId() == null
+                ? null
+                : teamRepository.findByIdAndOrganizationId(request.getOwnerTeamId(), orgId).orElse(null));
 
         return serviceRepository.save(service);
     }
 
     @Transactional
     public void deleteService(Long id) {
-        tenantContext.requireAny(Role.ORG_ADMIN);
+        tenantContext.requireAny(Role.ORG_ADMIN, Role.MANAGER);
         Long orgId = tenantContext.currentOrganizationId();
         ServiceComponent service = findService(id, orgId);
 
@@ -86,7 +92,7 @@ public class ServiceRegistryService {
 
     @Transactional
     public ServiceDependency createDependency(ServiceDependencyRequest request) {
-        tenantContext.requireAny(Role.ORG_ADMIN);
+        tenantContext.requireAny(Role.ORG_ADMIN, Role.MANAGER);
         Long orgId = tenantContext.currentOrganizationId();
         if (request.getFromServiceId().equals(request.getToServiceId())) {
             throw new IllegalArgumentException("A service cannot depend on itself");
@@ -111,8 +117,23 @@ public class ServiceRegistryService {
     }
 
     @Transactional
+    public ServiceDependency updateDependency(Long id, ServiceDependencyRequest request) {
+        tenantContext.requireAny(Role.ORG_ADMIN, Role.MANAGER);
+        Long orgId = tenantContext.currentOrganizationId();
+        ServiceDependency dependency = dependencyRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Dependency not found"));
+        if (!dependency.getOrganization().getId().equals(orgId)) {
+            throw new NoSuchElementException("Dependency not found");
+        }
+        if (request.getDependencyType() != null) {
+            dependency.setDependencyType(request.getDependencyType());
+        }
+        return dependencyRepository.save(dependency);
+    }
+
+    @Transactional
     public void deleteDependency(Long id) {
-        tenantContext.requireAny(Role.ORG_ADMIN);
+        tenantContext.requireAny(Role.ORG_ADMIN, Role.MANAGER);
         ServiceDependency dependency = dependencyRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Dependency not found"));
         if (!dependency.getOrganization().getId().equals(tenantContext.currentOrganizationId())) {

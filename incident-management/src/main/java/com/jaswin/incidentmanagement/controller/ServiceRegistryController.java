@@ -59,6 +59,11 @@ public class ServiceRegistryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(registryService.createDependency(request));
     }
 
+    @PutMapping("/api/dependencies/{id}")
+    public ServiceDependency updateDependency(@PathVariable Long id, @Valid @RequestBody ServiceDependencyRequest request) {
+        return registryService.updateDependency(id, request);
+    }
+
     @DeleteMapping("/api/dependencies/{id}")
     public ResponseEntity<Void> deleteDependency(@PathVariable Long id) {
         registryService.deleteDependency(id);

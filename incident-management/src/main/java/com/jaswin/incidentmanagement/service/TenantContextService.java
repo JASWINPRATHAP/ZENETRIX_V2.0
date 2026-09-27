@@ -39,6 +39,9 @@ public class TenantContextService {
 
     public void requireAny(Role... roles) {
         Role actual = currentUser().getRole();
+        if (actual == Role.SUPER_ADMIN) {
+            return;
+        }
         boolean allowed = Arrays.stream(roles).anyMatch(role -> role == actual);
         if (!allowed) {
             throw new AccessDeniedException("Insufficient role for this action");
@@ -47,6 +50,9 @@ public class TenantContextService {
 
     public boolean hasAny(Role... roles) {
         Role actual = currentUser().getRole();
+        if (actual == Role.SUPER_ADMIN) {
+            return true;
+        }
         return Arrays.stream(roles).anyMatch(role -> role == actual);
     }
 }

@@ -1,32 +1,57 @@
 -- Baseline Zenetrix demo tenant. These inserts are idempotent for PostgreSQL.
 
-INSERT INTO organizations (name, domain, created_at)
-SELECT 'Acme Corp', 'acme.com', NOW()
+INSERT INTO organizations (name, domain, slug, plan, is_active, onboarding_completed, setup_step, created_at)
+SELECT 'Acme Corp', 'acme.com', 'acme', 'ENTERPRISE', true, true, 8, NOW()
 WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE domain = 'acme.com');
 
 INSERT INTO users (name, email, password, role, team, organization_id)
-SELECT 'Alice Admin', 'admin@acme.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGzGz15sPNg1U4rZJtzm', 'ORG_ADMIN', NULL, o.id
+SELECT 'Super Admin', 'superadmin@zenetrix.local', '$2a$10$RyTUw9eRswh/w6UIyGedkuCVqYaRmQKkXE6NoTxfWi6texdHdbbI2', 'SUPER_ADMIN', NULL, NULL
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'superadmin@zenetrix.local');
+
+INSERT INTO users (name, email, password, role, team, organization_id)
+SELECT 'Super Admin', 'super@zenetrix.local', '$2a$10$RyTUw9eRswh/w6UIyGedkuCVqYaRmQKkXE6NoTxfWi6texdHdbbI2', 'SUPER_ADMIN', NULL, NULL
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'super@zenetrix.local');
+
+
+INSERT INTO users (name, email, password, role, team, organization_id)
+SELECT 'Alice Admin', 'admin@acme.com', '$2a$10$RyTUw9eRswh/w6UIyGedkuCVqYaRmQKkXE6NoTxfWi6texdHdbbI2', 'ORG_ADMIN', NULL, o.id
 FROM organizations o
 WHERE o.domain = 'acme.com'
   AND NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@acme.com');
 
+INSERT INTO organizations (name, domain, slug, plan, is_active, onboarding_completed, setup_step, created_at)
+SELECT 'AWD', 'awd.in', 'awd', 'ENTERPRISE', true, false, 1, NOW()
+WHERE NOT EXISTS (SELECT 1 FROM organizations WHERE domain = 'awd.in');
+
 INSERT INTO users (name, email, password, role, team, organization_id)
-SELECT 'Maya Manager', 'manager@acme.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGzGz15sPNg1U4rZJtzm', 'MANAGER', 'PLATFORM', o.id
+SELECT 'AWD Admin', 'admin@awd.in', '$2a$10$RyTUw9eRswh/w6UIyGedkuCVqYaRmQKkXE6NoTxfWi6texdHdbbI2', 'ORG_ADMIN', NULL, o.id
+FROM organizations o
+WHERE o.domain = 'awd.in'
+  AND NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@awd.in');
+
+INSERT INTO users (name, email, password, role, team, organization_id)
+SELECT 'Maya Manager', 'manager@acme.com', '$2a$10$RyTUw9eRswh/w6UIyGedkuCVqYaRmQKkXE6NoTxfWi6texdHdbbI2', 'MANAGER', 'PLATFORM', o.id
 FROM organizations o
 WHERE o.domain = 'acme.com'
   AND NOT EXISTS (SELECT 1 FROM users WHERE email = 'manager@acme.com');
 
 INSERT INTO users (name, email, password, role, team, organization_id)
-SELECT 'Bob DB Support', 'bob.db@acme.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGzGz15sPNg1U4rZJtzm', 'SUPPORT_ENGINEER', 'DB_SUPPORT', o.id
+SELECT 'Bob DB Support', 'bob.db@acme.com', '$2a$10$RyTUw9eRswh/w6UIyGedkuCVqYaRmQKkXE6NoTxfWi6texdHdbbI2', 'SUPPORT_ENGINEER', 'DB_SUPPORT', o.id
 FROM organizations o
 WHERE o.domain = 'acme.com'
   AND NOT EXISTS (SELECT 1 FROM users WHERE email = 'bob.db@acme.com');
 
 INSERT INTO users (name, email, password, role, team, organization_id)
-SELECT 'Eve Employee', 'eve@acme.com', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HCGzGz15sPNg1U4rZJtzm', 'EMPLOYEE', NULL, o.id
+SELECT 'Eve Employee', 'eve@acme.com', '$2a$10$RyTUw9eRswh/w6UIyGedkuCVqYaRmQKkXE6NoTxfWi6texdHdbbI2', 'EMPLOYEE', NULL, o.id
 FROM organizations o
 WHERE o.domain = 'acme.com'
   AND NOT EXISTS (SELECT 1 FROM users WHERE email = 'eve@acme.com');
+
+INSERT INTO users (name, email, password, role, team, organization_id)
+SELECT 'Charlie Infra', 'charlie.infra@acme.com', '$2a$10$RyTUw9eRswh/w6UIyGedkuCVqYaRmQKkXE6NoTxfWi6texdHdbbI2', 'SUPPORT_ENGINEER', 'INFRA_SUPPORT', o.id
+FROM organizations o
+WHERE o.domain = 'acme.com'
+  AND NOT EXISTS (SELECT 1 FROM users WHERE email = 'charlie.infra@acme.com');
 
 INSERT INTO teams (name, lead_id, organization_id, created_at)
 SELECT 'Platform Reliability', u.id, o.id, NOW()

@@ -36,6 +36,9 @@ public class ServiceComponent {
     @Column(nullable = false)
     private ServiceType type;
 
+    @Column(name = "custom_type")
+    private String customType;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 

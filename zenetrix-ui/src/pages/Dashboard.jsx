@@ -153,17 +153,29 @@ const Dashboard = () => {
         <div className="panel p-6">
           <h3 className="section-title">Build Sequence</h3>
           <p className="section-subtitle">The enforced order from the specification.</p>
-          <div className="mt-5 space-y-3">
-            {setupSteps.map((step, index) => (
-              <div key={step.label} className="flex items-center gap-3">
-                <div className={step.done ? 'step-dot step-dot-done' : 'step-dot'}>{index + 1}</div>
-                <div className="flex-1">
-                  <div className="text-sm font-semibold">{step.label}</div>
-                  <div className="text-xs text-ink-muted">{step.done ? 'Ready' : 'Pending setup'}</div>
-                </div>
-                {step.done && <CheckCircle2 size={17} className="text-accent" />}
-              </div>
-            ))}
+          <div className="mt-5 space-y-2">
+            {setupSteps.map((step, index) => {
+              const targetRoute = step.label === 'Incidents' ? '/incidents' : '/operations';
+              return (
+                <a
+                  key={step.label}
+                  href={targetRoute}
+                  className="flex items-center gap-3 rounded-md p-2 -mx-2 hover:bg-muted transition-colors group"
+                  title={`Navigate to ${step.label}`}
+                >
+                  <div className={step.done ? 'step-dot step-dot-done' : 'step-dot'}>{index + 1}</div>
+                  <div className="flex-1">
+                    <div className="text-sm font-semibold group-hover:text-primary transition-colors">{step.label}</div>
+                    <div className="text-xs text-ink-muted">{step.done ? 'Configured' : 'Pending setup'}</div>
+                  </div>
+                  {step.done ? (
+                    <CheckCircle2 size={17} className="text-accent" />
+                  ) : (
+                    <ArrowUpRight size={15} className="text-ink-faint group-hover:text-primary transition-colors" />
+                  )}
+                </a>
+              );
+            })}
           </div>
         </div>
       </section>

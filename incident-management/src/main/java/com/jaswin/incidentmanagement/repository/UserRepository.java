@@ -17,4 +17,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByOrganizationIdOrderByNameAsc(Long organizationId);
 
     Optional<User> findByIdAndOrganizationId(Long id, Long organizationId);
+
+    long countByOrganizationId(Long organizationId);
+
+    long countByRoleAndOrganizationId(Role role, Long organizationId);
+
+    long countByRole(Role role);
+
+    boolean existsByEmail(String email);
 }
+
