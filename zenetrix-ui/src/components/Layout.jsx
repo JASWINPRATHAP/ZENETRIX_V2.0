@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import OnboardingWizard from './OnboardingWizard';
 import api from '../api';
+import { useSimulation } from '../simulation/SimulationContext';
 
 const defaultNavItems = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -37,13 +38,14 @@ const Layout = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [wizardOpen, setWizardOpen] = useState(false);
+  const { isRunning } = useSimulation();
 
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
   const isOrgAdmin = user?.role === 'ORG_ADMIN';
   const navItems = isSuperAdmin ? superAdminNavItems : defaultNavItems;
 
   useEffect(() => {
-    if (isOrgAdmin) {
+    if (isOrgAdmin && !isRunning) {
       api.get('/org/onboarding/status')
         .then((res) => {
           if (res.data && !res.data.isCompleted) {
@@ -51,8 +53,10 @@ const Layout = ({ children }) => {
           }
         })
         .catch(() => {});
+    } else if (isRunning) {
+      setWizardOpen(false);
     }
-  }, [isOrgAdmin]);
+  }, [isOrgAdmin, isRunning]);
 
   return (
     <div className="min-h-screen bg-background text-ink">

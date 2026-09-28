@@ -40,31 +40,43 @@ public class Incident {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_by_id", nullable = true) // Can be null if created by webhook
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "organization"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User reportedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "organization"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User assignedTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "organization", "createdBy"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "organization", "project", "createdBy", "assignedTo"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private WorkTask task;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "organization", "ownerTeam"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private ServiceComponent service;
 
     @Column

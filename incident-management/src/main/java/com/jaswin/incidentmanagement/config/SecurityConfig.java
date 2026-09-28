@@ -35,7 +35,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .headers(headers -> headers.frameOptions(org.springframework.security.config.Customizer.withDefaults()).disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/ws-live/**", "/h2-console/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/simulation/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/ws-live/**", "/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

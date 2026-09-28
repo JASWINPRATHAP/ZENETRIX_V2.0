@@ -6,7 +6,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -27,11 +29,15 @@ public class WorkTask {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "organization", "createdBy"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Project project;
 
     @Column(nullable = false)
@@ -43,16 +49,22 @@ public class WorkTask {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "organization"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User assignedTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password", "organization"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "organization", "ownerTeam"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private ServiceComponent service;
 
     @Column(nullable = false)

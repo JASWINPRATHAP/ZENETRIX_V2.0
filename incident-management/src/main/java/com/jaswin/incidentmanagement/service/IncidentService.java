@@ -16,12 +16,14 @@ import com.jaswin.incidentmanagement.exception.IncidentNotFoundException;
 import com.jaswin.incidentmanagement.repository.IncidentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class IncidentService {
 
     private final IncidentRepository incidentRepository;
@@ -37,7 +39,7 @@ public class IncidentService {
 
     // CREATE incident
     public Incident createIncident(IncidentRequest request) {
-        User currentUser = getCurrentUser();
+        User currentUser = userRepository.findById(getCurrentUser().getId()).orElseGet(this::getCurrentUser);
         WorkTask task = null;
         Project project = null;
         ServiceComponent service = null;

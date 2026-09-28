@@ -25,6 +25,8 @@ import java.util.List;
 public class IncidentController {
 
     private final IncidentService incidentService;
+    private final com.jaswin.incidentmanagement.service.BlastRadiusService blastRadiusService;
+    private final com.jaswin.incidentmanagement.similarity.SimilarityService similarityService;
 
     @PostMapping
     @Operation(summary = "Create a new incident")
@@ -92,21 +94,21 @@ public class IncidentController {
 
     @GetMapping("/{id}/similar")
     @Operation(summary = "Find similar past incidents")
-    public ResponseEntity<?> getSimilarIncidents(@PathVariable Long id, @org.springframework.beans.factory.annotation.Autowired com.jaswin.incidentmanagement.similarity.SimilarityService similarityService) {
+    public ResponseEntity<?> getSimilarIncidents(@PathVariable Long id) {
         return ResponseEntity.ok(similarityService.findSimilarIncidents(id));
     }
 
     @GetMapping("/{id}/blast-radius")
     @Operation(summary = "Get blast radius report for an incident")
     @org.springframework.security.access.prepost.PreAuthorize("@incidentAuthorizationService.canAccessIncident(authentication, #id)")
-    public ResponseEntity<?> getBlastRadius(@PathVariable Long id, @org.springframework.beans.factory.annotation.Autowired com.jaswin.incidentmanagement.service.BlastRadiusService blastRadiusService) {
+    public ResponseEntity<?> getBlastRadius(@PathVariable Long id) {
         return ResponseEntity.ok(blastRadiusService.calculateForIncident(id));
     }
 
     @GetMapping("/{id}/suggestions")
     @Operation(summary = "Get resolution suggestions for an incident")
     @org.springframework.security.access.prepost.PreAuthorize("@incidentAuthorizationService.canAccessIncident(authentication, #id)")
-    public ResponseEntity<?> getResolutionSuggestions(@PathVariable Long id, @org.springframework.beans.factory.annotation.Autowired com.jaswin.incidentmanagement.similarity.SimilarityService similarityService) {
+    public ResponseEntity<?> getResolutionSuggestions(@PathVariable Long id) {
         return ResponseEntity.ok(similarityService.findResolutionSuggestions(id));
     }
 }

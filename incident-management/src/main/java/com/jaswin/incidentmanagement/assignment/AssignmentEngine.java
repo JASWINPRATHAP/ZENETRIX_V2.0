@@ -46,7 +46,7 @@ public class AssignmentEngine {
                     incident.setAssignedTo(assignedEngineer);
                     log.info("Incident successfully auto-assigned to engineer: {}", assignedEngineer.getName());
                 } else {
-                    log.warn("No engineers found in team {} for organization {}", rule.getTargetTeam(), incident.getOrganization().getName());
+                    log.warn("No engineers found in team {} for organization ID {}", rule.getTargetTeam(), incident.getOrganization().getId());
                 }
                 
                 // Break after first match or keep evaluating? Let's just use the first matched rule.

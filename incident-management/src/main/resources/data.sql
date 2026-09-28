@@ -126,7 +126,7 @@ WHERE p.name = 'Checkout Resilience'
   AND NOT EXISTS (SELECT 1 FROM project_services ps WHERE ps.project_id = p.id AND ps.service_id = s.id);
 
 INSERT INTO tasks (title, description, stage, priority, due_date, assigned_to_id, created_by_id, service_id, project_id, organization_id, created_at, updated_at)
-SELECT 'Harden payment session handoff', 'Payment session creation fails when Auth API latency spikes.', 'Blocked', 'HIGH', NOW() + INTERVAL '2 days', employee.id, manager.id, service.id, project.id, org.id, NOW(), NOW()
+SELECT 'Harden payment session handoff', 'Payment session creation fails when Auth API latency spikes.', 'Blocked', 'HIGH', CURRENT_TIMESTAMP, employee.id, manager.id, service.id, project.id, org.id, NOW(), NOW()
 FROM organizations org
 JOIN users manager ON manager.email = 'manager@acme.com'
 JOIN users employee ON employee.email = 'eve@acme.com'

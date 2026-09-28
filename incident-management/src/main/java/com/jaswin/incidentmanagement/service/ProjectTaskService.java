@@ -83,7 +83,7 @@ public class ProjectTaskService {
 
     @Transactional
     public WorkTask createTask(Long projectId, TaskRequest request) {
-        tenantContext.requireAny(Role.MANAGER, Role.SUPPORT_ENGINEER);
+        tenantContext.requireAny(Role.ORG_ADMIN, Role.MANAGER, Role.SUPPORT_ENGINEER);
         Long orgId = tenantContext.currentOrganizationId();
         Project project = findProject(projectId);
         ServiceComponent service = serviceRepository.findByIdAndOrganizationId(request.getServiceId(), orgId)
@@ -106,7 +106,7 @@ public class ProjectTaskService {
 
     @Transactional
     public WorkTask updateTask(Long taskId, TaskRequest request) {
-        tenantContext.requireAny(Role.MANAGER, Role.SUPPORT_ENGINEER);
+        tenantContext.requireAny(Role.ORG_ADMIN, Role.MANAGER, Role.SUPPORT_ENGINEER);
         Long orgId = tenantContext.currentOrganizationId();
         WorkTask task = findTask(taskId);
         ServiceComponent service = serviceRepository.findByIdAndOrganizationId(request.getServiceId(), orgId)
@@ -123,7 +123,7 @@ public class ProjectTaskService {
 
     @Transactional
     public WorkTask assignTask(Long taskId, AssignTaskRequest request) {
-        tenantContext.requireAny(Role.MANAGER, Role.SUPPORT_ENGINEER);
+        tenantContext.requireAny(Role.ORG_ADMIN, Role.MANAGER, Role.SUPPORT_ENGINEER);
         WorkTask task = findTask(taskId);
         task.setAssignedTo(findUser(request.getAssignedToId(), tenantContext.currentOrganizationId()));
         return taskRepository.save(task);

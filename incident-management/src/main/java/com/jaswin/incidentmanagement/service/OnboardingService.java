@@ -37,6 +37,13 @@ public class OnboardingService {
         long servicesWithOwnerCount = services.stream().filter(s -> s.getOwnerTeam() != null).count();
 
         long slaPolicyCount = slaPolicyRepository.countByOrganizationId(orgId);
+        if (slaPolicyCount == 0) {
+            slaPolicyRepository.save(com.jaswin.incidentmanagement.entity.SlaPolicy.builder().organization(org).priority(com.jaswin.incidentmanagement.enums.Priority.CRITICAL).resolutionTimeLimitHours(1).build());
+            slaPolicyRepository.save(com.jaswin.incidentmanagement.entity.SlaPolicy.builder().organization(org).priority(com.jaswin.incidentmanagement.enums.Priority.HIGH).resolutionTimeLimitHours(4).build());
+            slaPolicyRepository.save(com.jaswin.incidentmanagement.entity.SlaPolicy.builder().organization(org).priority(com.jaswin.incidentmanagement.enums.Priority.MEDIUM).resolutionTimeLimitHours(8).build());
+            slaPolicyRepository.save(com.jaswin.incidentmanagement.entity.SlaPolicy.builder().organization(org).priority(com.jaswin.incidentmanagement.enums.Priority.LOW).resolutionTimeLimitHours(24).build());
+            slaPolicyCount = 4;
+        }
         long managerCount = userRepository.countByRoleAndOrganizationId(Role.MANAGER, orgId);
         long totalUsers = userRepository.countByOrganizationId(orgId);
 
@@ -117,7 +124,10 @@ public class OnboardingService {
         }
         long slaPolicyCount = slaPolicyRepository.countByOrganizationId(orgId);
         if (slaPolicyCount == 0) {
-            throw new IllegalStateException("Cannot complete onboarding: Step 5 (SLA Rules) requires SLA resolution policies.");
+            slaPolicyRepository.save(com.jaswin.incidentmanagement.entity.SlaPolicy.builder().organization(org).priority(com.jaswin.incidentmanagement.enums.Priority.CRITICAL).resolutionTimeLimitHours(1).build());
+            slaPolicyRepository.save(com.jaswin.incidentmanagement.entity.SlaPolicy.builder().organization(org).priority(com.jaswin.incidentmanagement.enums.Priority.HIGH).resolutionTimeLimitHours(4).build());
+            slaPolicyRepository.save(com.jaswin.incidentmanagement.entity.SlaPolicy.builder().organization(org).priority(com.jaswin.incidentmanagement.enums.Priority.MEDIUM).resolutionTimeLimitHours(8).build());
+            slaPolicyRepository.save(com.jaswin.incidentmanagement.entity.SlaPolicy.builder().organization(org).priority(com.jaswin.incidentmanagement.enums.Priority.LOW).resolutionTimeLimitHours(24).build());
         }
 
         org.setOnboardingCompleted(true);

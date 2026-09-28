@@ -7,7 +7,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -27,6 +29,8 @@ public class ServiceComponent {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Organization organization;
 
     @Column(nullable = false)
@@ -45,6 +49,8 @@ public class ServiceComponent {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_team_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "lead"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Team ownerTeam;
 
     @Enumerated(EnumType.STRING)

@@ -20,8 +20,9 @@ public class EmailService {
 
     public void sendIncidentCreatedNotification(Incident incident, String toEmail) {
         String subject = "New Incident Created: [" + incident.getPriority() + "] " + incident.getTitle();
+        String reporterName = incident.getReportedBy() != null ? incident.getReportedBy().getName() : "System";
         String text = String.format("A new incident has been created.\n\nID: %d\nTitle: %s\nPriority: %s\nReported By: %s\n\nDescription: %s",
-                incident.getId(), incident.getTitle(), incident.getPriority(), incident.getReportedBy(), incident.getDescription());
+                incident.getId(), incident.getTitle(), incident.getPriority(), reporterName, incident.getDescription());
         
         sendEmail(toEmail, subject, text, NotificationEventType.INCIDENT_CREATED);
     }

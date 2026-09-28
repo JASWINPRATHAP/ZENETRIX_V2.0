@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Activity,
@@ -11,8 +11,15 @@ import {
   Building2,
   Users,
   Sparkles,
+  Play,
+  Trash2,
+  RotateCcw,
+  CheckCircle2,
+  Cpu,
 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
+import { useSimulation } from '../simulation/SimulationContext';
+import { runFullSimulation } from '../simulation/simulationEngine';
 
 const PERSONAS = [
   {
@@ -56,8 +63,77 @@ const Login = () => {
   const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const navigate = useNavigate();
+
+  const {
+    isRunning,
+    delay,
+    abortRef,
+    logActivity,
+    setCurrentPhase,
+    setPhaseTitle,
+    setProgressPercent,
+    setShowCleanupModal,
+    setSimulatedDataSummary,
+    setIsRunning,
+    runCleanup,
+    checkSimulationStatus,
+  } = useSimulation();
+
+  const [simTenantExists, setSimTenantExists] = useState(false);
+  const [cleaningUpSim, setCleaningUpSim] = useState(false);
+  const [cleanupNotice, setCleanupNotice] = useState('');
+
+  const refreshSimStatus = async () => {
+    try {
+      const res = await checkSimulationStatus('apexcloud.io');
+      setSimTenantExists(res?.exists || false);
+    } catch {
+      setSimTenantExists(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshSimStatus();
+  }, []);
+
+  const handleStartSimulation = async () => {
+    setCleanupNotice('');
+    try {
+      await runFullSimulation({
+        navigate,
+        login,
+        logout,
+        delay,
+        abortRef,
+        logActivity,
+        setCurrentPhase,
+        setPhaseTitle,
+        setProgressPercent,
+        setShowCleanupModal,
+        setSimulatedDataSummary,
+        setIsRunning,
+      });
+      refreshSimStatus();
+    } catch (err) {
+      console.error('Simulation error:', err);
+    }
+  };
+
+  const handleManualPurge = async () => {
+    setCleaningUpSim(true);
+    setCleanupNotice('');
+    try {
+      const res = await runCleanup('apexcloud.io');
+      setCleanupNotice(res?.message || 'Simulation data purged from Supabase.');
+      setSimTenantExists(false);
+    } catch (err) {
+      setCleanupNotice('Error during cleanup: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setCleaningUpSim(false);
+    }
+  };
 
   const handleSelectPersona = (p) => {
     setSelectedPersona(p.id);
@@ -87,6 +163,7 @@ const Login = () => {
     e.preventDefault();
     handleAuth(email, password);
   };
+
 
   return (
     <div className="min-h-screen bg-background text-ink">
@@ -130,6 +207,23 @@ const Login = () => {
                 );
               })}
             </div>
+
+            <div className="mt-6 rounded-xl border border-line bg-surface/60 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Cpu size={16} className="text-accent" />
+                  <span className="text-xs font-semibold text-ink">Ready to inspect end-to-end?</span>
+                </div>
+                <button
+                  type="button"
+                  disabled={isRunning}
+                  onClick={handleStartSimulation}
+                  className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+                >
+                  Launch Simulator <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center justify-between border-t border-line pt-4 text-xs text-ink-muted">
@@ -140,6 +234,78 @@ const Login = () => {
 
         <section className="grid place-items-center overflow-y-auto px-10 py-8">
           <div className="w-full max-w-md">
+            {/* AUTONOMOUS PLATFORM SIMULATION HERO CARD */}
+            <div className="mb-6 overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 via-surface to-accent/10 p-5 shadow-xl shadow-primary/10">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="relative grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-primary to-accent text-white shadow-md shadow-primary/30">
+                    <Cpu size={20} className={isRunning ? 'animate-pulse' : ''} />
+                    {isRunning && (
+                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Autopilot Simulator</span>
+                      {simTenantExists && (
+                        <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">
+                          Apex Cloud in DB
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-sm font-bold text-ink">Autonomous Platform Walkthrough</h3>
+                  </div>
+                </div>
+              </div>
+
+              <p className="mt-2.5 text-xs leading-relaxed text-ink-muted">
+                Simulates real human interaction step-by-step: <strong className="text-ink">Tenant Provisioning</strong> → <strong className="text-ink">8-Step Wizard Architecture</strong> → <strong className="text-ink">Staff Provisioning</strong> → <strong className="text-ink">Incident & Blast Radius</strong> → <strong className="text-ink">Resolver Remediation</strong> → <strong className="text-ink">Return to Login & DB Purge</strong>.
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  id="run-simulation-btn"
+                  disabled={isRunning}
+                  onClick={handleStartSimulation}
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-accent hover:from-primary-hover hover:to-accent px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-primary/25 transition-all disabled:opacity-50"
+                >
+                  {isRunning ? (
+                    <>
+                      <Sparkles size={14} className="animate-spin" /> Simulation Running...
+                    </>
+                  ) : (
+                    <>
+                      <Play size={14} className="fill-white" /> Run Full Platform Simulation
+                    </>
+                  )}
+                </button>
+
+                {simTenantExists && (
+                  <button
+                    type="button"
+                    disabled={cleaningUpSim || isRunning}
+                    onClick={handleManualPurge}
+                    title="Purge Apex Financial Cloud records from Supabase"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2.5 text-xs font-semibold text-rose-400 hover:bg-rose-500/20 transition disabled:opacity-50"
+                  >
+                    <Trash2 size={13} />
+                    {cleaningUpSim ? 'Purging...' : 'Purge DB'}
+                  </button>
+                )}
+              </div>
+
+              {cleanupNotice && (
+                <div className="mt-2.5 flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-2 text-xs text-emerald-400">
+                  <CheckCircle2 size={13} />
+                  <span>{cleanupNotice}</span>
+                </div>
+              )}
+            </div>
+
             {/* Quick Persona Picker */}
             <div className="mb-4">
               <div className="mb-2 flex items-center justify-between">
